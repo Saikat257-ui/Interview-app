@@ -188,4 +188,3 @@ For support and questions, please open an issue in the repository or contact the
 ---
 
 **Built with ❤️ using React, TypeScript, and modern web technologies**
-
