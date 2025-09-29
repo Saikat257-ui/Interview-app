@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, Alert, Space, Divider } from 'antd';
+import { Form, Input, Button, Card, Typography, Alert, Space, Row, Col } from 'antd';
 import { UserOutlined, MailOutlined, PhoneOutlined, PlayCircleOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
@@ -45,7 +45,7 @@ const CandidateInfoForm: React.FC<CandidateInfoFormProps> = ({
 
   return (
     <Card style={{ 
-      maxWidth: 700, 
+      maxWidth: 920, 
       margin: '0 auto',
       borderRadius: '20px',
       border: 'none',
@@ -78,111 +78,135 @@ const CandidateInfoForm: React.FC<CandidateInfoFormProps> = ({
         </Text>
       </div>
 
-      <Form
-        form={form}
-        layout="vertical"
-        onValuesChange={handleValuesChange}
-        style={{ marginBottom: 24 }}
-      >
-        <Form.Item
-          label={<span style={{ fontSize: '16px', fontWeight: 600, color: '#333' }}>Full Name</span>}
-          name="name"
-          rules={[
-            { required: true, message: 'Please enter your full name' },
-            { min: 2, message: 'Name must be at least 2 characters' },
-          ]}
-        >
-          <Input
-            prefix={<UserOutlined style={{ color: '#667eea', fontSize: '18px' }} />}
-            placeholder="Enter your full name"
-            size="large"
-            style={{
-              borderRadius: '16px',
-              border: '2px solid #e8e8e8',
-              padding: '12px 16px',
-              fontSize: '16px',
-              background: 'rgba(102, 126, 234, 0.02)',
-              transition: 'all 0.3s ease'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = '#667eea';
-              e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-              e.target.style.background = 'rgba(102, 126, 234, 0.05)';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = '#e8e8e8';
-              e.target.style.boxShadow = 'none';
-              e.target.style.background = 'rgba(102, 126, 234, 0.02)';
-            }}
-          />
-        </Form.Item>
+      <Row gutter={16} style={{ marginBottom: 28 }}>
+        <Col xs={24} md={14} style={{ paddingLeft: 28 }}>
+          <Form
+            form={form}
+            layout="vertical"
+            onValuesChange={handleValuesChange}
+            style={{ marginBottom: 0 }}
+          >
+            <Form.Item
+              label={<span style={{ fontSize: '14px', fontWeight: 500, color: '#333' }}>Full Name</span>}
+              name="name"
+              rules={[
+                { required: true, message: 'Please enter your full name' },
+                { min: 2, message: 'Name must be at least 2 characters' },
+              ]}
+            >
+              <Input
+                prefix={<UserOutlined style={{ color: '#667eea', fontSize: '14px' }} />}
+                placeholder="Enter your full name"
+                size="small"
+                style={{
+                  borderRadius: '10px',
+                  border: '1px solid #f0f0f0',
+                  padding: '8px 12px 8px 14px',
+                  fontSize: '13px',
+                  maxWidth: '350px',
+                  boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
+                  background: 'rgba(102, 126, 234, 0.02)',
+                  transition: 'all 0.12s ease'
+                }}
+              />
+            </Form.Item>
 
-        <Form.Item
-          label={<span style={{ fontSize: '16px', fontWeight: 600, color: '#333' }}>Email Address</span>}
-          name="email"
-          rules={[
-            { required: true, message: 'Please enter your email address' },
-            { type: 'email', message: 'Please enter a valid email address' },
-          ]}
-        >
-          <Input
-            prefix={<MailOutlined style={{ color: '#667eea', fontSize: '18px' }} />}
-            placeholder="Enter your email address"
-            size="large"
-            style={{
-              borderRadius: '16px',
-              border: '2px solid #e8e8e8',
-              padding: '12px 16px',
-              fontSize: '16px',
-              background: 'rgba(102, 126, 234, 0.02)',
-              transition: 'all 0.3s ease'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = '#667eea';
-              e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-              e.target.style.background = 'rgba(102, 126, 234, 0.05)';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = '#e8e8e8';
-              e.target.style.boxShadow = 'none';
-              e.target.style.background = 'rgba(102, 126, 234, 0.02)';
-            }}
-          />
-        </Form.Item>
+            <Form.Item
+              label={<span style={{ fontSize: '14px', fontWeight: 500, color: '#333' }}>Email Address</span>}
+              name="email"
+              rules={[
+                { required: true, message: 'Please enter your email address' },
+                { type: 'email', message: 'Please enter a valid email address' },
+              ]}
+            >
+              <Input
+                prefix={<MailOutlined style={{ color: '#667eea', fontSize: '14px' }} />}
+                placeholder="Enter your email address"
+                size="small"
+                style={{
+                  borderRadius: '10px',
+                  border: '1px solid #f0f0f0',
+                  padding: '8px 12px 8px 14px',
+                  fontSize: '13px',
+                  maxWidth: '350px',
+                  boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
+                  background: 'rgba(102, 126, 234, 0.02)',
+                  transition: 'all 0.12s ease'
+                }}
+              />
+            </Form.Item>
 
-        <Form.Item
-          label={<span style={{ fontSize: '16px', fontWeight: 600, color: '#333' }}>Phone Number</span>}
-          name="phone"
-          rules={[
-            { required: true, message: 'Please enter your phone number' },
-            { pattern: /^\+?[\d\s\-()]+$/, message: 'Please enter a valid phone number' },
-          ]}
-        >
-          <Input
-            prefix={<PhoneOutlined style={{ color: '#667eea', fontSize: '18px' }} />}
-            placeholder="Enter your phone number"
-            size="large"
-            style={{
-              borderRadius: '16px',
-              border: '2px solid #e8e8e8',
-              padding: '12px 16px',
-              fontSize: '16px',
-              background: 'rgba(102, 126, 234, 0.02)',
-              transition: 'all 0.3s ease'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = '#667eea';
-              e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-              e.target.style.background = 'rgba(102, 126, 234, 0.05)';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = '#e8e8e8';
-              e.target.style.boxShadow = 'none';
-              e.target.style.background = 'rgba(102, 126, 234, 0.02)';
-            }}
-          />
-        </Form.Item>
-      </Form>
+            <Form.Item
+              label={<span style={{ fontSize: '14px', fontWeight: 500, color: '#333' }}>Phone Number</span>}
+              name="phone"
+              rules={[
+                { required: true, message: 'Please enter your phone number' },
+                { pattern: /^\+?[\d\s\-()]+$/, message: 'Please enter a valid phone number' },
+              ]}
+            >
+              <Input
+                prefix={<PhoneOutlined style={{ color: '#667eea', fontSize: '14px' }} />}
+                placeholder="Enter your phone number"
+                size="small"
+                style={{
+                  borderRadius: '10px',
+                  border: '1px solid #f0f0f0',
+                  padding: '8px 12px 8px 14px',
+                  fontSize: '13px',
+                  maxWidth: '350px',
+                  boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
+                  background: 'rgba(102, 126, 234, 0.02)',
+                  transition: 'all 0.12s ease'
+                }}
+              />
+            </Form.Item>
+          </Form>
+        </Col>
+
+  <Col xs={24} md={10} style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: '20px',
+            backgroundColor: '#f9f9f9',
+            borderRadius: '8px'
+          }}>
+            <Title level={3} style={{ color: '#1890ff', marginBottom: 16 }}>
+              Interview Details
+            </Title>
+            <Space direction="vertical" size={12}>
+              <Text style={{ color: '#666', fontSize: '14px' }}>• 6 Technical Questions (2 Easy, 2 Medium, 2 Hard)</Text>
+              <Text style={{ color: '#666', fontSize: '14px' }}>• Timed responses with automatic submission</Text>
+              <Text style={{ color: '#666', fontSize: '14px' }}>• AI-powered scoring and feedback</Text>
+              <Text style={{ color: '#666', fontSize: '14px' }}>• Resume-based question generation</Text>
+            </Space>
+
+            <div style={{ marginTop: 20, textAlign: 'center' }}>
+              <Button
+                type="primary"
+                size="large"
+                icon={<PlayCircleOutlined />}
+                onClick={handleSubmit}
+                disabled={!isValid}
+                style={{ 
+                  width: '100%',
+                  height: 50,
+                  borderRadius: '25px',
+                  background: isValid ? 'linear-gradient(45deg, #667eea, #764ba2)' : undefined,
+                  border: 'none',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  boxShadow: isValid ? '0 4px 15px rgba(102, 126, 234, 0.4)' : undefined
+                }}
+              >
+                Start Interview
+              </Button>
+            </div>
+          </div>
+        </Col>
+      </Row>
 
       {!isValid && (
         <Alert
@@ -194,45 +218,10 @@ const CandidateInfoForm: React.FC<CandidateInfoFormProps> = ({
         />
       )}
 
-      <Divider />
-
-      <div style={{ textAlign: 'center' }}>
-        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-          <div>
-            <Title level={4} style={{ color: '#1890ff', marginBottom: 8 }}>
-              Interview Details
-            </Title>
-            <Space direction="vertical" size="small">
-              <Text>• 6 Technical Questions (2 Easy, 2 Medium, 2 Hard)</Text>
-              <Text>• Timed responses with automatic submission</Text>
-              <Text>• AI-powered scoring and feedback</Text>
-              <Text>• Resume-based question generation</Text>
-            </Space>
-          </div>
-
-          <Button
-            type="primary"
-            size="large"
-            icon={<PlayCircleOutlined />}
-            onClick={handleSubmit}
-            disabled={!isValid}
-            style={{ 
-              width: 220,
-              height: 50,
-              borderRadius: '25px',
-              background: isValid ? 'linear-gradient(45deg, #667eea, #764ba2)' : undefined,
-              border: 'none',
-              fontSize: '16px',
-              fontWeight: 600,
-              boxShadow: isValid ? '0 4px 15px rgba(102, 126, 234, 0.4)' : undefined
-            }}
-          >
-            Start Interview
-          </Button>
-        </Space>
-      </div>
+      
     </Card>
   );
 };
 
 export default CandidateInfoForm;
+

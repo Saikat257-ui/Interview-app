@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useInterviewState } from '../store/hooks';
-import { Button, Card, Space } from 'antd';
+import { Button, Card, Space, Spin } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { createCandidate, updateCandidateInfo, startInterview, setCurrentCandidate } from '../store/slices/interviewSlice';
 import ResumeUpload from '../components/ResumeUpload';
@@ -139,7 +139,24 @@ const IntervieweePage: React.FC = () => {
               onFieldCollected={handleFieldCollected}
             />
           ) : (
-            <div>Creating candidate...</div>
+            <Card
+              style={{
+                textAlign: 'center',
+                borderRadius: 12,
+                boxShadow: '0 8px 20px rgba(102,126,234,0.12)',
+                marginTop: 24,
+                padding: '36px 24px'
+              }}
+            >
+              <Space direction="vertical" size="middle" style={{ width: '100%', alignItems: 'center' }}>
+                <Spin size="large" />
+                <div style={{ fontSize: 18, fontWeight: 600 }}>Creating candidate</div>
+                <div style={{ color: 'rgba(0,0,0,0.45)' }}>We're parsing your resume and preparing the interview experience. This should only take a moment.</div>
+                <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.35)', marginTop: 6 }}>
+                  <AnimatedDots />
+                </div>
+              </Space>
+            </Card>
           )
         ) : (
           <ResumeUpload onResumeParsed={handleResumeUpload} />
@@ -159,6 +176,16 @@ const IntervieweePage: React.FC = () => {
       )}
     </div>
   );
+};
+
+// Small inline animated dots component used by the loading card
+const AnimatedDots: React.FC = () => {
+  const [dots, setDots] = useState(1);
+  useEffect(() => {
+    const t = setInterval(() => setDots(d => (d % 3) + 1), 400);
+    return () => clearInterval(t);
+  }, []);
+  return <span>{Array.from({ length: dots }).map((_, i) => <span key={i}>•</span>)}</span>;
 };
 
 export default IntervieweePage;
