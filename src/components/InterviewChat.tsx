@@ -366,7 +366,8 @@ const InterviewChat: React.FC = () => {
               key={message.id}
               style={{
                 marginBottom: 12,
-                textAlign: message.type === 'user' ? 'right' : 'left',
+                display: 'flex',
+                justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start',
               }}
             >
               <div
@@ -384,7 +385,8 @@ const InterviewChat: React.FC = () => {
                   border: message.type === 'system' ? 'none' : '1px solid rgba(0,0,0,0.1)',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                   fontSize: '15px',
-                  lineHeight: '1.5'
+                  lineHeight: '1.5',
+                  textAlign: 'left',
                 }}
               >
                 <div style={{
