@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { InterviewState, Candidate, Answer } from '../../types';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import type { InterviewState, Candidate, Answer, Question } from '../../types';
 import { generateQuestions, calculateScore, generateSummary } from '../../utils/interviewUtils';
 
 // Validation helpers
@@ -7,12 +7,29 @@ const isValidEmail = (email?: string) => !!email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 const isValidPhone = (phone?: string) => !!phone && /^\+?[\d\s\-()]{7,}$/.test(phone);
 const isValidName = (name?: string) => !!name && name.trim().length >= 2;
 
-const initialState: InterviewState = {
+interface ExtendedInterviewState extends InterviewState {
+  questions: Question[];
+  questionsLoading: boolean;
+}
+
+const initialState: ExtendedInterviewState = {
   currentCandidate: null,
   candidates: [],
+  questions: [],
   isLoading: false,
+  questionsLoading: false,
   error: null,
 };
+
+export const generateInterviewQuestions = createAsyncThunk(
+  'interview/generateQuestions',
+  async (resumeText?: string) => {
+    console.log('Generating questions with resume text:', resumeText ? 'Present' : 'Not provided');
+    const questions = await generateQuestions(resumeText);
+    console.log('Generated questions:', questions);
+    return questions;
+  }
+);
 
 const interviewSlice = createSlice({
   name: 'interview',
@@ -122,18 +139,15 @@ const interviewSlice = createSlice({
       }
     },
     submitAnswer: (state, action: PayloadAction<{ answer: string; timeSpent: number }>) => {
-      if (!state.currentCandidate) return;
+      if (!state.currentCandidate || !state.questions.length) return;
 
       const { answer, timeSpent } = action.payload;
-      const questions = generateQuestions();
-      const currentQuestion = questions[state.currentCandidate.currentQuestionIndex];
+      const currentQuestion = state.questions[state.currentCandidate.currentQuestionIndex];
       
       if (!currentQuestion) {
         state.error = 'Invalid question index';
         return;
       }
-
-      if (!currentQuestion) return;
 
       const score = calculateScore(answer, currentQuestion.difficulty);
       const newAnswer: Answer = {
@@ -151,7 +165,7 @@ const interviewSlice = createSlice({
       state.currentCandidate.updatedAt = new Date().toISOString();
 
       // Check if interview is complete
-      if (state.currentCandidate.currentQuestionIndex >= questions.length) {
+      if (state.currentCandidate.currentQuestionIndex >= state.questions.length) {
         state.currentCandidate.status = 'completed';
         state.currentCandidate.finalScore = Math.round(
           state.currentCandidate.scores.reduce((sum, score) => sum + score, 0) / state.currentCandidate.scores.length
@@ -168,6 +182,9 @@ const interviewSlice = createSlice({
     setCurrentCandidate: (state, action: PayloadAction<string | null>) => {
       if (action.payload === null) {
         state.currentCandidate = null;
+        // Clear questions when clearing candidate
+        state.questions = [];
+        state.questionsLoading = false;
       } else {
         const candidate = state.candidates.find(c => c.id === action.payload);
         state.currentCandidate = candidate || null;
@@ -189,6 +206,9 @@ const interviewSlice = createSlice({
           state.candidates[index] = state.currentCandidate;
         }
       }
+      // Clear questions when resetting
+      state.questions = [];
+      state.questionsLoading = false;
     },
     deleteCandidate: (state, action: PayloadAction<string>) => {
       const candidateId = action.payload;
@@ -213,6 +233,22 @@ const interviewSlice = createSlice({
         state.currentCandidate = state.candidates.find(c => c.id === action.payload.currentCandidateId) || null;
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(generateInterviewQuestions.pending, (state) => {
+        state.questionsLoading = true;
+        state.error = null;
+      })
+      .addCase(generateInterviewQuestions.fulfilled, (state, action) => {
+        state.questionsLoading = false;
+        state.questions = action.payload;
+        console.log('Questions stored in Redux state:', action.payload);
+      })
+      .addCase(generateInterviewQuestions.rejected, (state, action) => {
+        state.questionsLoading = false;
+        state.error = action.error.message || 'Failed to generate questions';
+      });
   },
 });
 

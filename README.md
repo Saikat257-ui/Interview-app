@@ -93,12 +93,20 @@ src/
    npm install
    ```
 
-3. **Start the development server**
+3. **Configure Gemini API**
+   - Copy `.env.example` to `.env`
+   - Get your Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Add your API key to `.env`:
+     ```
+     REACT_APP_GEMINI_API_KEY=your_actual_api_key_here
+     ```
+
+4. **Start the development server**
    ```bash
    npm start
    ```
 
-4. **Open your browser**
+5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## 📖 Usage Guide
@@ -120,7 +128,13 @@ src/
 ## 🔧 Configuration
 
 ### Interview Questions
-Questions are dynamically generated in `src/utils/interviewUtils.ts`. Customize the question sets by modifying the `generateQuestions()` function.
+Questions are now dynamically generated using Google's Gemini AI based on the candidate's resume content. The system:
+- Analyzes the uploaded resume text
+- Generates 6 personalized questions (2 Easy, 2 Medium, 2 Hard)
+- Focuses on technologies and skills mentioned in the resume
+- Falls back to generic questions if API fails or no resume is provided
+
+To customize the question generation prompt, modify `src/utils/geminiService.ts`.
 
 ### Time Limits
 Adjust question time limits in the same file by modifying the `timeLimit` property of each question object.

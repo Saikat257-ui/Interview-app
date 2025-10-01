@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, Input, Button, Typography, Progress, Tag, Space, Divider } from 'antd';
 import { SendOutlined, ClockCircleOutlined, CheckCircleOutlined, DashboardOutlined, ReloadOutlined, HomeOutlined } from '@ant-design/icons';
 import { useInterviewState, useAppDispatch } from '../store/hooks';
-import { submitAnswer, resetInterview } from '../store/slices/interviewSlice';
+import { submitAnswer, resetInterview, generateInterviewQuestions } from '../store/slices/interviewSlice';
 import { useNavigate } from 'react-router-dom';
-import { generateQuestions, formatTime } from '../utils/interviewUtils';
+import { formatTime } from '../utils/interviewUtils';
 import type { Message } from '../types';
 import CandidateInfoForm from './CandidateInfoForm';
 
@@ -14,7 +14,7 @@ const { TextArea } = Input;
 const InterviewChat: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { currentCandidate } = useInterviewState();
+  const { currentCandidate, questions, questionsLoading } = useInterviewState();
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const [currentAnswer, setCurrentAnswer] = useState('');
@@ -23,11 +23,16 @@ const InterviewChat: React.FC = () => {
   const [interviewCompleted, setInterviewCompleted] = useState(false);
   const [candidateInfo, setCandidateInfo] = useState<{ name?: string; email?: string; phone?: string }>({});
   const [infoComplete, setInfoComplete] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const lastSubmittedRef = useRef<number | null>(null);
 
-  const questions = React.useMemo(() => generateQuestions(), []);
+  // Only generate questions if we don't have any and candidate is in-progress
+  useEffect(() => {
+    if (currentCandidate?.status === 'in-progress' && questions.length === 0 && !questionsLoading) {
+      dispatch(generateInterviewQuestions(currentCandidate.resumeText));
+    }
+  }, [currentCandidate?.status, currentCandidate?.resumeText, questions.length, questionsLoading, dispatch]);
   const [isMobile, setIsMobile] = useState<boolean>(typeof window !== 'undefined' ? window.innerWidth < 740 : false);
   const startedRef = useRef(false);
   const addMessageIfNotExists = (msg: Message) => {
@@ -35,6 +40,16 @@ const InterviewChat: React.FC = () => {
   };
   const currentQuestionIndex = currentCandidate?.currentQuestionIndex || 0;
   const currentQuestion = questions[currentQuestionIndex];
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('InterviewChat - Questions in state:', questions);
+    console.log('InterviewChat - Current question:', currentQuestion);
+    console.log('InterviewChat - Questions loading:', questionsLoading);
+  }, [questions, currentQuestion, questionsLoading]);
+
+  // Show loading state while questions are being generated for in-progress interviews
+  // (rendered later to ensure hooks are always called in the same order)
 
   const handleViewResults = () => {
     navigate('/interviewer');
@@ -62,7 +77,10 @@ const InterviewChat: React.FC = () => {
   // Handles answer submission
   const handleSubmitAnswer = useCallback((answer: string): void => {
     if (!currentCandidate || !currentQuestion) return;
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
     const timeSpent = Math.floor((Date.now() - startTimeRef.current) / 1000);
     const answerMessage: Message = {
       id: `answer-${currentQuestionIndex}`,
@@ -137,8 +155,9 @@ const InterviewChat: React.FC = () => {
       setIsAnswering(true);
     } else if (currentCandidate?.status === 'completed') {
       setInterviewCompleted(true);
-      if (intervalRef.current) {
+      if (intervalRef.current !== null) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
       startedRef.current = false;
     }
@@ -146,12 +165,18 @@ const InterviewChat: React.FC = () => {
 
   useEffect(() => {
     if (!isAnswering) return;
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => {
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    intervalRef.current = window.setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
           // Timeout logic - dispatch directly to avoid circular dependency
-          if (intervalRef.current) clearInterval(intervalRef.current);
+          if (intervalRef.current !== null) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
           // Prevent duplicate timeout submissions for the same question
           if (currentCandidate && currentQuestion && lastSubmittedRef.current !== currentQuestionIndex) {
             const timeSpent = Math.floor((Date.now() - startTimeRef.current) / 1000);
@@ -175,7 +200,10 @@ const InterviewChat: React.FC = () => {
       });
     }, 1000);
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
   }, [isAnswering, currentQuestionIndex, currentCandidate, currentQuestion, dispatch]);
 

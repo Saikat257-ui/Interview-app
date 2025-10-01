@@ -1,55 +1,60 @@
 import type { Question, Answer } from '../types';
+import { generateQuestionsFromResume } from './geminiService';
 
-export const generateQuestions = (): Question[] => {
-  const easyQuestions = [
+export const generateQuestions = async (resumeText?: string): Promise<Question[]> => {
+  console.log('generateQuestions called with resumeText:', resumeText ? `${resumeText.substring(0, 100)}...` : 'undefined');
+  
+  if (resumeText && resumeText.trim().length > 0) {
+    try {
+      console.log('Attempting to generate questions from resume...');
+      const geminiQuestions = await generateQuestionsFromResume(resumeText);
+      console.log('Successfully generated Gemini questions:', geminiQuestions);
+      return geminiQuestions;
+    } catch (error) {
+      console.error('Failed to generate questions from resume, using fallback:', error);
+    }
+  } else {
+    console.log('No resume text provided, using fallback questions');
+  }
+  
+  // Fallback questions if API fails or no resume text
+  return [
     {
       id: 'easy-1',
-      text: 'What is React and why would you use it for building user interfaces?',
+      text: 'Tell me about your technical background and experience.',
       difficulty: 'easy' as const,
       timeLimit: 20,
     },
     {
       id: 'easy-2',
-      text: 'Explain the difference between let, const, and var in JavaScript.',
+      text: 'What programming languages are you most comfortable with?',
       difficulty: 'easy' as const,
       timeLimit: 20,
     },
-  ];
-
-  const mediumQuestions = [
     {
       id: 'medium-1',
-      text: 'How does React handle state management and what are the benefits of using Redux?',
+      text: 'Describe a challenging project you worked on and how you solved it.',
       difficulty: 'medium' as const,
       timeLimit: 60,
     },
     {
       id: 'medium-2',
-      text: 'Explain the concept of middleware in Node.js and provide an example use case.',
+      text: 'How do you approach debugging and troubleshooting issues?',
       difficulty: 'medium' as const,
       timeLimit: 60,
     },
-  ];
-
-  const hardQuestions = [
     {
       id: 'hard-1',
-      text: 'How would you optimize the performance of a React application with a large number of components? Discuss specific techniques and tools.',
+      text: 'Design a system architecture for a high-traffic web application.',
       difficulty: 'hard' as const,
       timeLimit: 120,
     },
     {
       id: 'hard-2',
-      text: 'Explain the event loop in Node.js and how it handles asynchronous operations. How does this differ from traditional multi-threaded environments?',
+      text: 'How would you optimize performance in a complex application?',
       difficulty: 'hard' as const,
       timeLimit: 120,
     },
-  ];
-
-  return [
-    ...easyQuestions,
-    ...mediumQuestions,
-    ...hardQuestions,
   ];
 };
 

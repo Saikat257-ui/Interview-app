@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, Typography, Alert, Space, Row, Col } from 'antd';
 import { UserOutlined, MailOutlined, PhoneOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { useAppDispatch, useInterviewState } from '../store/hooks';
+import { generateInterviewQuestions } from '../store/slices/interviewSlice';
 
 const { Title, Text } = Typography;
 
@@ -19,6 +21,8 @@ const CandidateInfoForm: React.FC<CandidateInfoFormProps> = ({
   onUpdate,
   onStartInterview,
 }) => {
+  const dispatch = useAppDispatch();
+  const { currentCandidate, questionsLoading } = useInterviewState();
   const [form] = Form.useForm();
   const [isValid, setIsValid] = useState(false);
 
@@ -37,9 +41,17 @@ const CandidateInfoForm: React.FC<CandidateInfoFormProps> = ({
     onUpdate(allValues);
   };
 
-  const handleSubmit = () => {
-    if (isValid) {
-      onStartInterview();
+  const handleSubmit = async () => {
+    if (isValid && currentCandidate) {
+      try {
+        // Generate questions based on resume content before starting interview
+        await dispatch(generateInterviewQuestions(currentCandidate.resumeText)).unwrap();
+        onStartInterview();
+      } catch (error) {
+        console.error('Failed to generate questions:', error);
+        // Still start interview with fallback questions
+        onStartInterview();
+      }
     }
   };
 
@@ -189,7 +201,8 @@ const CandidateInfoForm: React.FC<CandidateInfoFormProps> = ({
                 size="large"
                 icon={<PlayCircleOutlined />}
                 onClick={handleSubmit}
-                disabled={!isValid}
+                disabled={!isValid || questionsLoading}
+                loading={questionsLoading}
                 style={{ 
                   width: '100%',
                   height: 50,
